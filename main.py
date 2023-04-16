@@ -63,6 +63,8 @@ def pick_points(x, y):
         screen.onclick(mon_partition)
         print("done with placing cameras")
     
+    count += 1
+
     try:
 
         check = input("Do you want to add another camera? (Y for yes and N for no)")
@@ -71,7 +73,8 @@ def pick_points(x, y):
         if check.lower() != "y":
             state = 1
     except:
-        count += 1
+        # count += 1
+        print("continue")
         return
 
 
