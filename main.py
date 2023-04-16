@@ -1,4 +1,6 @@
 import turtle
+import networkx as nx
+import matplotlib as plt
 
 global screen
 global count
@@ -9,6 +11,11 @@ state = 0
 global sides
 global polygon
 polygon = []
+global graph 
+graph = nx.Graph()
+
+
+##########################################################################################################################
 
 #get how many sides the polygon will be
 sides = input("How many sides do you want the polygon to have?")
@@ -18,6 +25,13 @@ if sides <= 3:
     print("Must enter more than 3 sides.")
     turtle.bye()
 
+
+
+##########################################################################################################################
+
+
+
+
 #draws the initial lines to build the poylygon
 def draw_line(x, y):
     #initiating global vars
@@ -25,6 +39,7 @@ def draw_line(x, y):
     global pen
     global sides
     global polygon
+    global graph
     print("drawing line")
     global count
     count += 1 #increment count because mouse has been clicked
@@ -36,12 +51,47 @@ def draw_line(x, y):
         pen.pendown() # put the pen down to start drawing
         pen.goto(x, y) # move the turtle to the clicked position
         pen.penup() # lift the pen up to stop drawing
+
+
+        ################################################################################
+        # creating the graph in here since it has both nodes 
+        ################################################################################
+
+        if len(polygon) > 1:
+            node_prev = polygon[-2]
+        else:
+            node_prev = 0
+
+        node_curr = (x,y)
+
+        if node_curr not in graph and node_prev != 0:
+            print("add node")
+            graph.add_node(node_curr, c = 0)
+            graph.add_edge(node_prev,node_curr)
+        elif node_curr not in graph and node_prev == 0:
+            graph.add_node((0,0), c = 0)
+            graph.add_node(node_curr, c = 0)
+            graph.add_edge((0,0), node_curr)
+
+        ################################################################################
+
+
         return
     else:
+        graph.add_edge(polygon[-1], (0,0))
         origin() #when there have been (sides - 1) sides made go to the origin 
         screen.onclick(pick_points) #change mouse click to picking points
         count = 0
         return
+
+
+
+
+##########################################################################################################################
+
+
+
+
 
 def pick_points(x, y):
     #initiating global vars
@@ -50,7 +100,16 @@ def pick_points(x, y):
     global pen
     global sides
     global state
+    global graph
 
+
+    # for node in graph.nodes():
+    #     print(node)
+    # for edge in graph.edges():
+    #     node1, node2 = edge
+    #     print(f"Edge: {node1} - {node2}, Nodes: {node1}, {node2}")
+    # for edge in graph.edges():
+    #     print(edge)
 
     if state != 1 and count < sides: #if still in drawing state or the havent reached max number of cameras
         #making turtle go to point and make a dot there
@@ -78,8 +137,8 @@ def pick_points(x, y):
         return
 
 
-# ========================================================================================
-# ========================================================================================
+
+##########################################################################################################################
 
 
 def left_right(v1, v2, v3, dir):
@@ -90,7 +149,13 @@ def left_right(v1, v2, v3, dir):
 
 
 
+##########################################################################################################################
+
+
+
 def mon_partition(x,y):
+
+    global graph
 
     upper = []
     lower = []
@@ -120,8 +185,17 @@ def mon_partition(x,y):
     # return (upper, lower)
 
 
+
+
+##########################################################################################################################
+
+
+
+
 #in the works
 def triangulation(x, y):
+    global graph 
+
     print("in triangulation")
     diag = []
     y_sort = sorted(polygon, key=lambda x: x[1])
@@ -130,22 +204,44 @@ def triangulation(x, y):
 
         while len(diag) >= 2 and (left_right(diag[-2], diag[-1], vert, "L")):
             popped = diag.pop()
+            graph.add_edge(popped,vert)
             # add diagonal (popped, vert)
         
         while len(diag) >= 2 and (left_right(diag[-2], diag[-1], vert, "R")):
             popped = diag.pop()
+            graph.add_edge(popped,vert)
             # add diagonal (popped, vert)
         
         diag.append(vert)
     
     while len(diag) >= 3:
         popped = diag.pop()
+        graph.add_edge(popped,diag[0])
         # add diagonal (popped, diag[0])
 
-    
 
-# ========================================================================================
-# ========================================================================================
+
+##########################################################################################################################
+
+
+
+def three_color():
+    global graph
+
+    available = {1,2,3}
+    # use a.remove(#)
+
+    for node in graph.node():
+        color = graph.nodes[node]['c']
+        if color == 0:
+            print("I cry")
+            
+
+
+
+
+    
+##########################################################################################################################
 
 
 
@@ -157,9 +253,18 @@ def origin():
     pen.pendown()
     pen.goto(0,0)
 
+
+##########################################################################################################################
+
+
+
 def close():
     global screen
     screen.bye()
+
+
+##########################################################################################################################
+
 
 pen = turtle.Turtle()
 screen = turtle.Screen()
