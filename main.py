@@ -61,10 +61,10 @@ def pick_points(x, y):
         # SHOULD BE GOING TO PARTITIONING FIRST
         # screen.onclick(triangulation)
         screen.onclick(mon_partition)
-        screen.onclick(triangulation)
         print("done with placing cameras")
     
     try:
+
         check = input("Do you want to add another camera? (Y for yes and N for no)")
 
         #if user chooses n state will change to 1 and no more cameras will be placed
@@ -111,6 +111,8 @@ def mon_partition(x,y):
     print("U: ", upper)
     print("L: ", lower)
 
+    screen.onclick(triangulation)
+
     return
     # return (upper, lower)
 
@@ -123,11 +125,11 @@ def triangulation(x, y):
 
     for vert in y_sort:
 
-        while len(diag) >= 2 and (left_right(diag[-2], diag[-1, vert, "L"])):
+        while len(diag) >= 2 and (left_right(diag[-2], diag[-1], vert, "L")):
             popped = diag.pop()
             # add diagonal (popped, vert)
         
-        while len(diag) >= 2 and (left_right(diag[-2], diag[-1, vert, "R"])):
+        while len(diag) >= 2 and (left_right(diag[-2], diag[-1], vert, "R")):
             popped = diag.pop()
             # add diagonal (popped, vert)
         
