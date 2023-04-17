@@ -219,6 +219,8 @@ def triangulation(x, y):
         graph.add_edge(popped,diag[0])
         # add diagonal (popped, diag[0])
 
+    three_color()
+
 
 
 ##########################################################################################################################
@@ -228,13 +230,46 @@ def triangulation(x, y):
 def three_color():
     global graph
 
-    available = {1,2,3}
+    count = [0,0,0]
     # use a.remove(#)
 
-    for node in graph.node():
+    for node in graph.nodes():
+
+        print("Node: ", node)
+        
+        available = [1,2,3]
+
         color = graph.nodes[node]['c']
         if color == 0:
-            print("I cry")
+            homies = list(graph.neighbors(node))
+
+            bud1 = homies[0]
+            bud2 = homies[1]
+
+            print("neighbors: ", bud1, bud2)
+
+            c1 = graph.nodes[bud1]['c']
+            c2 = graph.nodes[bud2]['c']
+
+            print("Colors: ", c1, c2)
+
+            if c1 in available:
+                available.remove(c1)
+            if c2 in available:
+                available.remove(c2)
+            
+            print("available: ", available)
+            
+            col_curr = available[0]
+            count[col_curr-1] += 1
+
+            print("color assigned: ", col_curr)
+            graph.nodes[node]['c'] = col_curr
+    
+    print("Colors count: ", count)
+    print("End ========================================")
+    
+
             
 
 
