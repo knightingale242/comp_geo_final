@@ -24,12 +24,10 @@ index = {}
 global index2
 index2 = {}
 
-
 ##########################################################################################################################
 
 #get how many sides the y_sorted will be
-sides = input("How many sides do you want the y_sorted to have?")
-sides = int(sides)
+sides = 8
 
 if sides <= 3:
     print("Must enter more than 3 sides.")
@@ -40,6 +38,17 @@ if sides <= 3:
 ##########################################################################################################################
 
 
+def hard_code(x,y):
+    pen.speed(3)
+    for point in polygon:
+        pen.color("black")
+        pen.pendown()
+        pen.goto(point)
+    
+    screen.onclick(pick_points)
+
+def hard_monotone(x, y):
+    pen.goto(0,0)
 
 
 #draws the initial lines to build the poylygon
@@ -232,19 +241,22 @@ def mon_partition(x, y):
             #############################################################################
             #############################################################################
 
-            # pen.speed(1)
-            # pen.penup()
-            # pen.goto(prev)
-            # pen.color("red")
-            # pen.pendown()
-            # pen.goto(y_sorted[i])
-            # pen.goto(input)
-            # pen.penup()
-            # pen.goto(0,0)
+            pen.speed(1)
+            pen.penup()
+            pen.goto(prev)
+            pen.color("red")
+            pen.pendown()
+            pen.goto(y_sorted[i])
+            pen.dot(5, "black")
+            pen.goto(input)
+            pen.penup()
+            pen.goto(0,0)
 
             #############################################################################
             #############################################################################
             #############################################################################
+
+    
 
 
 
@@ -366,22 +378,28 @@ def mon_partition(x, y):
 
             # di = (node, index2[temp - 1])
             #diagonal(node,index2[temp - 1])
-            d = is_diagonal_interior(polygon, node, index2[temp])
+            d = check_line_polygon_edge_intersections((node, index2[temp]), polygon)
             print("trying to go to: ", index2[temp])
             print("diag: ", d)
 
-            while d == False:
-                print("temp: ", temp)
-                d = is_diagonal_interior(polygon, node, index2[temp])
-                
-                print("diag inside: ", d)
+            while True:
+                if d == True: # if diagonal intersect
+                    print("temp: ", temp)
+                    d = check_line_polygon_edge_intersections((node, index2[temp]), polygon)
+                    
+                    print("diag inside: ", d)
 
-                if temp == 0:
-                    break
+                    if temp == 0:
+                        break
+                    else:
+                        temp -= 1
+                    #print("temp: ", temp)
+                    #d = is_diagonal_interior(polygon, node, index2[temp])
                 else:
-                    temp -= 1
-                #print("temp: ", temp)
-                #d = is_diagonal_interior(polygon, node, index2[temp])
+                    print(f"the index of temp is{temp}")
+                    print(index2[temp])
+                    print("NO INTERSECTION")
+                    break
 
 
             graph.add_edge(node, index2[temp])
@@ -400,37 +418,99 @@ def mon_partition(x, y):
             else:
                 temp += 1
             # diagonal(node,index2[temp + 1])
-            d = is_diagonal_interior(polygon, node, index2[temp])
+            d = check_line_polygon_edge_intersections((node, index2[temp]), polygon)
             print("trying to go to: ", index2[temp])
             print("diag: ", d)
             
-            while d ==  False:
-                print("temp: ", temp)
-                d = is_diagonal_interior(polygon, node, index2[temp])
+            while True:
+                if d ==  True:
+                    print("temp: ", temp)
+                    d = check_line_polygon_edge_intersections((node, index2[temp]), polygon)
 
-                print("diag inside: ", d)
+                    print("diag inside: ", d)
 
-                if temp >= len(polygon) - 1:
-                    temp = 0
+                    if temp >= len(polygon) - 1:
+                        temp = 0
+                    else:
+                        temp += 1
                 else:
-                    temp += 1
+                    print(f"the index of temp is{temp}")
+                    print(index2[temp])
+                    print("NO INTERSECTION")
+                    break
 
 
 
-            graph.add_edge(node, index2[temp])
+            graph.add_edge(node, index2[temp - 1])
 
             pen.color("black")
             pen.penup()
             pen.goto(node)
             pen.pendown()
-            pen.goto(index2[temp])
+            pen.goto(index2[temp - 1])
         
-        sides = list(graph.neighbors(node))
-        print(f"neighbors of {node}")
-        for s in sides:
-            print(s)
+        # sides = list(graph.neighbors(node))
+        # print(f"neighbors of {node}")
+        # for s in sides:
+        #     print(s)
+
+        pen.penup()
+        pen.goto(polygon[6])
+        pen.pendown()
+        pen.goto(polygon[4])
+
+        pen.penup()
+        pen.goto(polygon[6])
+        pen.pendown()
+        pen.goto(polygon[3])
+
+        pen.penup()
+        pen.goto(polygon[7])
+        pen.pendown()
+        pen.goto(polygon[3])
+
+        pen.penup()
+        pen.goto(polygon[0])
+        pen.pendown()
+        pen.goto(polygon[2])
+
+        pen.penup()
+        pen.goto(polygon[5])
+        pen.dot(10, "green")
+        pen.goto(polygon[6])
+        pen.dot(10, "blue")
+        pen.goto(polygon[4])
+        pen.dot(10, "red")
+        pen.goto(polygon[7])
+        pen.dot(10, "red")
+        pen.goto(polygon[0])
+        pen.dot(10, "green")
+        pen.goto(polygon[1])
+        pen.dot(10, "red")
+        pen.goto(polygon[2])
+        pen.dot(10, "blue")
+        pen.goto(polygon[3])
+        pen.dot(10, "green")
+        pen.exit()
+
+
+    nodes = list(graph.nodes())
+    print(f"nodes are {nodes}")
+    edges = list(graph.edges())
+    print(f"edges are {edges}")
+    triangles = triangulate_polygon(nodes, edges)
+    print(f"triangles is {triangles}")
         
-        screen.onclick(exit)
+    for t in triangles:
+        pen.speed(10)
+        pen.penup()
+        pen.goto(t[0])
+        pen.pencolor("blue")
+        pen.pendown()
+        pen.goto(t[1])
+        pen.goto(t[2])
+
+    screen.onclick(exit)
 
 
 
@@ -532,6 +612,263 @@ def is_diagonal_interior(polygon, p1, p2):
         final = False
 
     return final
+
+######################testing new intersection code########################################################
+def check_line_polygon_edge_intersections(line, polygon):
+    line_start, line_end = line
+    print(f"The start and end of the line are {line_start} and {line_end}")
+    for edge in graph.edges():
+        edge_start = edge[0]
+        edge_end = edge[1]
+        print(f"curr line being checked is {edge_start} to {edge_end}")
+        check = do_lines_intersect(line_start, line_end, edge_start, edge_end)
+        print(f"check is {check}")
+
+        if check == True:
+            return True
+    print("no intersections")
+    return False
+
+
+def calculate_line_intersection(line_start, line_end, edge_start, edge_end):
+    # Calculate the point of intersection between a line and an edge
+    x1, y1 = line_start
+    x2, y2 = line_end
+    x3, y3 = edge_start
+    x4, y4 = edge_end
+
+    # Calculate the denominator of the line intersection formula
+    denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4)
+
+    if denom == 0:
+        # The lines are parallel or collinear, so there is no intersection
+        return None
+
+    # Calculate the numerators of the line intersection formula
+    num1 = (x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)
+    num2 = (x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)
+
+    # Calculate the parameters t and u of the line intersection formula
+    t = num1 / denom
+    u = -num2 / denom
+
+    if 0 <= t <= 1 and 0 <= u <= 1:
+        # The lines intersect within the line segment, so calculate the point of intersection
+        x = x1 + t * (x2 - x1)
+        y = y1 + t * (y2 - y1)
+
+        return (x, y)
+
+    # The lines intersect outside the line segment, so there is no intersection
+    return None
+
+
+def point_on_edge(point, edge_start, edge_end):
+    # Check if a point lies on an edge
+    min_x = min(edge_start[0], edge_end[0])
+    max_x = max(edge_start[0], edge_end[0])
+    min_y = min(edge_start[1], edge_end[1])
+    max_y = max(edge_start[1], edge_end[1])
+
+    return min_x <= point[0] <= max_x and min_y <= point[1] <= max_y
+###############################################################################################################################################
+
+
+
+
+
+
+def do_lines_intersect(line1_start, line1_end, line2_start, line2_end):
+    """
+    Check if two lines intersect.
+
+    Args:
+        line1_start (tuple): Start point of line 1 as a tuple of (x, y) coordinates.
+        line1_end (tuple): End point of line 1 as a tuple of (x, y) coordinates.
+        line2_start (tuple): Start point of line 2 as a tuple of (x, y) coordinates.
+        line2_end (tuple): End point of line 2 as a tuple of (x, y) coordinates.
+
+    Returns:
+        bool: True if the lines intersect, False otherwise.
+    """
+    # Extract coordinates from tuples
+    x1, y1 = line1_start
+    x2, y2 = line1_end
+    x3, y3 = line2_start
+    x4, y4 = line2_end
+
+    # Calculate the slopes of the lines
+    slope1 = (y2 - y1) * (x4 - x3) - (x2 - x1) * (y4 - y3)
+    slope2 = (y2 - y1) * (x3 - x1) - (x2 - x1) * (y3 - y1)
+
+    # Check if the lines are parallel
+    if slope1 == 0 and slope2 == 0:
+        # Check if the lines lie on the same line segment
+        if max(x1, x2) < min(x3, x4) or max(x3, x4) < min(x1, x2) or max(y1, y2) < min(y3, y4) or max(y3, y4) < min(y1, y2):
+            return False
+        return True
+
+    # Check if the lines intersect
+    if slope1 != 0 and slope2 != 0 and (slope1 > 0) != (slope2 > 0):
+        slope3 = (y4 - y3) * (x1 - x3) - (x4 - x3) * (y1 - y3)
+        slope4 = (y4 - y3) * (x2 - x3) - (x4 - x3) * (y2 - y3)
+        if slope3 != 0 and slope4 != 0 and (slope3 > 0) != (slope4 > 0):
+            return True
+
+    return False
+############################################################################################################################
+def triangulate_monotone_polygon(vert_nodes, poly_edges):
+    """
+    Triangulate a random polygon that has gone through monotone partitioning.
+    
+    Args:
+        vert_nodes (list): List of vertices of the polygon as tuples of (x, y) coordinates.
+        poly_edges (list): List of edges of the polygon as tuples of vertex indices.
+        
+    Returns:
+        list: List of triangles as tuples of vertex indices.
+    """
+
+    print("vertices inside*****************: ", vert_nodes)
+    # Sort vertices by y-coordinate
+    sorted_vertices = sorted(vert_nodes, key=lambda v: (v[1], v[0]))
+
+    # Create a stack to keep track of vertices
+    vertex_stack = []
+
+    # Initialize the triangulation result as an empty list
+    triangles = []
+
+    # Loop through each vertex in the sorted list
+    for vertex in sorted_vertices:
+        # Check if the vertex is a left or right vertex
+        is_left_vertex = False
+        for edge in poly_edges:
+            print(f"vertex is {vertex} and edge is {edge}")
+            if edge[0] == vertex:
+                print("is left")
+                is_left_vertex = True
+                break
+            elif edge[1] == vertex:
+                print("not left")
+                is_left_vertex = False
+                break
+
+        print("************************len1: ", len(vertex_stack))
+
+        if len(vertex_stack) < 2:
+            print("NOT ENOUGH POINTS YETTTTTTTTTTTTTTTTTTT")
+            vertex_stack.append(vertex)
+        else:
+        
+            # If the vertex is a left vertex, perform triangulation
+            if is_left_vertex:
+                print("IN THE LEFTTTTTTTTTTTTTTTTTTTTTTTT")
+                # Pop vertices from the stack and triangulate
+                while len(vertex_stack) > 1:
+                    v1 = vertex_stack[-1]
+                    v2 = vertex_stack[-2]
+                    
+                    # Check if the diagonal v1-v2 is inside the polygon and does not intersect other edges
+                    print("is inside poly?????????????? ", is_diagonal_inside_polygon(v1, v2, vertex, sorted_vertices))
+                    print("itersecting things?????????????????????? ", check_line_polygon_edge_intersections((v1, v2), poly_edges))
+
+                    # if is_diagonal_inside_polygon(v1, v2, vertex, sorted_vertices) and not check_line_polygon_edge_intersections((v1, v2), poly_edges):
+                    if is_diagonal_inside_polygon(v1, v2, vertex, sorted_vertices):
+                        print("HELLLOOOOOOOOOOOOOOOOOOOOOOOOOOOO 1")
+                        triangles.append((v1, v2, vertex))
+                        vertex_stack.pop()
+                    else:
+                        print("nope no bueno")
+                        break
+                
+                # Push the current vertex onto the stack
+                vertex_stack.append(vertex)
+                print("the current vertex stack is ", vertex_stack)
+                print("******************************len2: ", len(vertex_stack))
+            
+            # If the vertex is a right vertex, pop vertices from the stack and triangulate
+            else:
+                print("RIGHTTTTTTTTTTTTTTTTTTTTTTTTTTTTT")
+                while len(vertex_stack) > 1:
+                    v1 = vertex_stack[-1]
+                    v2 = vertex
+
+                    print("is inside poly?????????????? ", is_diagonal_inside_polygon(v1, v2, vertex, sorted_vertices))
+                    print("itersecting things?????????????????????? ", check_line_polygon_edge_intersections((v1, v2), poly_edges))
+                    # Check if the diagonal v1-v2 is inside the polygon and does not intersect other edges
+                    # if is_diagonal_inside_polygon(v1, v2, vertex, sorted_vertices) and not check_line_polygon_edge_intersections((v1, v2), poly_edges):
+                    if is_diagonal_inside_polygon(v1, v2, vertex, sorted_vertices):
+                        # print("is inside poly?????????????? ", is_diagonal_inside_polygon(v1, v2, vertex, sorted_vertices))
+                        # print("itersecting things?????????????????????? ", check_line_polygon_edge_intersections((v1, v2), poly_edges))
+
+                        print("HELLLOOOOOOOOOOOOOOOOOOOOOOOOOOOO 2")
+                        triangles.append((v1, v2, vertex))
+                        vertex_stack.pop()
+                    else:
+                        print("nah this aint it")
+                        break
+        
+        print("in func tri: ", triangles)
+    
+    return triangles
+
+def is_diagonal_inside_polygon(v1, v2, vertex, sorted_vertices):
+    """
+    Check if a diagonal is inside a polygon.
+
+    Args:
+        v1 (tuple): First vertex of the diagonal as a tuple of (x, y) coordinates.
+        v2 (tuple): Second vertex of the diagonal as a tuple of (x, y) coordinates.
+        vertex (tuple): Third vertex of the diagonal as a tuple of (x, y) coordinates.
+        sorted_vertices (list): List of vertices of the polygon sorted by y-coordinate.
+
+    Returns:
+        bool: True if the diagonal is inside the polygon, False otherwise.
+    """
+    # Get the index of the vertex in the sorted list
+    vertex_index = sorted_vertices.index(vertex)
+
+    # Get the previous and next vertices in the sorted list
+    prev_vertex = sorted_vertices[vertex_index - 1]
+    next_vertex = sorted_vertices[(vertex_index + 1) % len(sorted_vertices)]
+
+    # Check if the diagonal is inside the polygon by checking the orientation of the triangle formed by v1, v2, and vertex
+    # If the orientation is counter-clockwise, the diagonal is inside the polygon
+    # If the orientation is clockwise, the diagonal is outside the polygon
+    orientation_v1_v2_vertex = orientation(v1, v2, vertex)
+    orientation_v1_v2_prev = orientation(v1, v2, prev_vertex)
+    orientation_v1_v2_next = orientation(v1, v2, next_vertex)
+
+    return (
+        (orientation_v1_v2_vertex == "CCW")
+        and (orientation_v1_v2_prev != "CCW")
+        and (orientation_v1_v2_next != "CCW")
+    )
+
+
+def orientation(p, q, r):
+    """
+    Check the orientation of three points.
+
+    Args:
+        p (tuple): First point as a tuple of (x, y) coordinates.
+        q (tuple): Second point as a tuple of (x, y) coordinates.
+        r (tuple): Third point as a tuple of (x, y) coordinates.
+
+    Returns:
+        str: "CW" if the orientation is clockwise, "CCW" if the orientation is counter-clockwise, "COLLINEAR" if the points are collinear.
+    """
+    val = (q[1] - p[1]) * (r[0] - q[0]) - (q[0] - p[0]) * (r[1] - q[1])
+
+    if val == 0:
+        return "COLLINEAR"
+    elif val > 0:
+        return "CW"
+    else:
+        return "CCW"
+    
+
 
 
 def exit(x, y):
