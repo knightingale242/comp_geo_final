@@ -216,29 +216,47 @@ def mon_partition(x, y):
             """
 
             neighbors = list(graph.neighbors(y_sorted[i]))
+            print("HERE: ", neighbors)
             neighbor1 = neighbors[0]
             neighbor2 = neighbors[1]
+
 
             if prev == neighbor1:
                 input = neighbor2
             else:
                 input = neighbor1
+
+
             
-            pen.speed(1)
-            pen.penup()
-            pen.goto(prev)
-            pen.color("red")
-            pen.pendown()
-            pen.goto(y_sorted[i])
-            pen.goto(input)
+            # THIS IS THE ANIMATION PART THAT TAKES EONS TO FINISH 
+            #############################################################################
+            #############################################################################
+
+            # pen.speed(1)
+            # pen.penup()
+            # pen.goto(prev)
+            # pen.color("red")
+            # pen.pendown()
+            # pen.goto(y_sorted[i])
+            # pen.goto(input)
+            # pen.penup()
+            # pen.goto(0,0)
+
+            #############################################################################
+            #############################################################################
+            #############################################################################
+
+
+
+
+
+
 
             print(f"the other input is {input}")
             
 
             print(f"neighbor 1 is : {neighbor1}")
             print(f"neighbor 2 is {neighbor2}")
-            check = is_clockwise((neighbor2, y_sorted[i], neighbor1))
-            print(f"the points {prev}, {y_sorted[i]} and {input} are clockwise is {check}")
             print(f"the current previous value is {prev}")
 
             # for n in neighbors:
@@ -274,10 +292,7 @@ def mon_partition(x, y):
 
                 test = is_split_vertex(prev, y_sorted[i], input)
                 print(f"the function say it is {test}")
-                toret = calculate_angle(prev, y_sorted[i], y_sorted[i], input)
                 print("potential merge")
-                print(f"the function say it is {test}")
-                print("angle: ", toret, "##########################################")
 
                 # if is_reflexive_or_convex(prev, y_sorted[i], input) == 'r':
                 #     graph.nodes[y_sorted[i]]["type"] = "merge"
@@ -297,9 +312,8 @@ def mon_partition(x, y):
                 #     graph.nodes[y_sorted[i]]["type"] = "split"
                 test = is_split_vertex(prev, y_sorted[i], input)
                 print(f"the is split function say it is {test}")
-                toret = calculate_angle(prev, y_sorted[i], y_sorted[i], input)
                 print("potential split")
-                print("angle: ", toret, "##########################################")
+
             
                 # if is_reflexive_or_convex(prev, y_sorted[i], input) == 'r':
                 #     graph.nodes[y_sorted[i]]["type"] = "split"
@@ -314,8 +328,6 @@ def mon_partition(x, y):
                 print("regular")
                 graph.nodes[y_sorted[i]]["type"] = "regular"
 
-                toret = calculate_angle(prev, y_sorted[i], y_sorted[i], input)
-                print("angle: ", toret, "##########################################")
 
         index[y_sorted[i]] = i
         index2[i] = y_sorted[i]
@@ -331,36 +343,87 @@ def mon_partition(x, y):
     print("printing the graph")
     print(f"the order of the points are: {polygon}")
     for node in graph.nodes():
+        neighbors = list(graph.neighbors(y_sorted[i]))
         print(node)
         print(graph.nodes[node]["type"])
     
     print("##########################################################")
     for node in graph.nodes():
+
+        # neighbors = list(graph.neighbors(y_sorted[i]))
+        # neighbor1 = neighbors[0]
+        # neighbor2 = neighbors[1]
+        
         print(f"curr node is {node}")
         if graph.nodes[node]["type"] == "merge":
             print("merge")
             curr = node[1]
             temp = index[node]
+            temp -= 1
             print(f"the index of this node is {temp}")
-            print(index2[temp + 1])
-            graph.add_edge(node, index2[temp - 1])
+            print(index2[temp - 1])
+
+
+            # di = (node, index2[temp - 1])
+            #diagonal(node,index2[temp - 1])
+            d = is_diagonal_interior(polygon, node, index2[temp])
+            print("trying to go to: ", index2[temp])
+            print("diag: ", d)
+
+            while d == False:
+                print("temp: ", temp)
+                d = is_diagonal_interior(polygon, node, index2[temp])
+                
+                print("diag inside: ", d)
+
+                if temp == 0:
+                    break
+                else:
+                    temp -= 1
+                #print("temp: ", temp)
+                #d = is_diagonal_interior(polygon, node, index2[temp])
+
+
+            graph.add_edge(node, index2[temp])
 
             pen.penup()
             pen.goto(node)
             pen.pendown()
-            pen.goto(index2[temp - 1])
+            pen.goto(index2[temp])
         
         if graph.nodes[node]["type"] == "split":
             print("split")
             curr = node[1]
             temp = index[node]
-            graph.add_edge(node, index2[temp + 1])
+            if temp == len(polygon) - 1:
+                temp = 0
+            else:
+                temp += 1
+            # diagonal(node,index2[temp + 1])
+            d = is_diagonal_interior(polygon, node, index2[temp])
+            print("trying to go to: ", index2[temp])
+            print("diag: ", d)
+            
+            while d ==  False:
+                print("temp: ", temp)
+                d = is_diagonal_interior(polygon, node, index2[temp])
+
+                print("diag inside: ", d)
+
+                if temp >= len(polygon) - 1:
+                    temp = 0
+                else:
+                    temp += 1
+
+
+
+            graph.add_edge(node, index2[temp])
 
             pen.color("black")
             pen.penup()
             pen.goto(node)
             pen.pendown()
-            pen.goto(index2[temp - 1])
+            pen.goto(index2[temp])
         
         sides = list(graph.neighbors(node))
         print(f"neighbors of {node}")
@@ -369,87 +432,10 @@ def mon_partition(x, y):
         
         screen.onclick(exit)
 
-def is_reflexive_or_convex(coord1, coord2, coord3):
-    # Extract x and y values from the coordinates
-    x1, y1 = coord1
-    x2, y2 = coord2
-    x3, y3 = coord3
 
-    # Compute the cross product
-    cross_product = (x2 - x1) * (y3 - y1) - (y2 - y1) * (x3 - x1)
 
-    print(f"the cross product of these angles are {cross_product}")
 
-    # if cross_product == 0:
-    #     # If cross product is 0, points are collinear
-    #     return 'c'
-    if cross_product < 0:
-        # If cross product is negative, points are convex
-        print("is reflexive")
-        return 'r'
-    elif cross_product > 0:
-        # Otherwise, points are neither reflexive nor convex
-        print("is not reflexive")
-        return 'c'
 
-def is_clockwise(points):
-    """
-    Determines if a set of points are arranged in clockwise order.
-
-    Args:
-        points (list): A list of tuples representing the points as (x, y) coordinates.
-
-    Returns:
-        bool: Returns True if the points are arranged in clockwise order, False otherwise.
-    """
-    n = len(points)
-    signed_area = 0
-
-    for i in range(n):
-        x1, y1 = points[i]
-        x2, y2 = points[(i + 1) % n]  # Wrap around to the first point for the last point
-        signed_area += (x2 - x1) * (y2 + y1)
-    if signed_area < 0:
-        print("clockwise")
-    else:
-        print("counter clockwise")
-    return signed_area < 0
-
-def calculate_angle(A, B, C, D):
-    """
-    Calculates the angle between two edges based on their vertex coordinates.
-
-    Args:
-        A (tuple): Coordinates of the first vertex of Edge 1 as (x, y) or (x, y, z).
-        B (tuple): Coordinates of the second vertex of Edge 1 as (x, y) or (x, y, z).
-        C (tuple): Coordinates of the first vertex of Edge 2 as (x, y) or (x, y, z).
-        D (tuple): Coordinates of the second vertex of Edge 2 as (x, y) or (x, y, z).
-
-    Returns:
-        float: Angle between the two edges in degrees.
-    """
-    # Calculate vectors
-    AB = (B[0] - A[0], B[1] - A[1])
-    CD = (D[0] - C[0], D[1] - C[1])
-
-    # Calculate dot product
-    dot_product = AB[0] * CD[0] + AB[1] * CD[1]
-    # dot_product = np.dot(A, B)
-
-    # Calculate magnitudes
-    magnitude1 = math.sqrt(AB[0]**2 + AB[1]**2)
-    magnitude2 = math.sqrt(CD[0]**2 + CD[1]**2)
-
-    # Calculate cosine of angle
-    cosine_theta = dot_product / (magnitude1 * magnitude2)
-
-    # Calculate angle in radians
-    theta_rad = math.acos(cosine_theta)
-
-    # Convert angle to degrees
-    angle_degrees = math.degrees(theta_rad)
-
-    return angle_degrees
 
 def is_split_vertex(vertex, prev_vertex, next_vertex):
     """
@@ -466,24 +452,87 @@ def is_split_vertex(vertex, prev_vertex, next_vertex):
         print("2")
         return False  # Not a split vertex
     
-def diagonal(diagonal, v1, v2):
+
+
+
+def is_diagonal_interior(polygon, p1, p2):
+    """
+    Checks if a diagonal line (p1, p2) is interior to a polygon and intersects any of its edges.
+
+    Args:
+        polygon (list): List of tuples representing the vertices of the polygon in clockwise or counter-clockwise order.
+        p1 (tuple): Tuple representing the starting point of the diagonal line.
+        p2 (tuple): Tuple representing the ending point of the diagonal line.
+
+    Returns:
+        bool: True if the diagonal is interior to the polygon and intersects any of its edges, False otherwise.
+    """
+    def is_left(p, q, r):
+        # print("CHECKING LEFT ", p, q, r)
+        """
+        Helper function to determine if point r is on the left side of the line formed by points p and q.
+
+        Args:
+            p (tuple): Tuple representing the starting point of the line.
+            q (tuple): Tuple representing the ending point of the line.
+            r (tuple): Tuple representing the point to be checked.
+
+        Returns:
+            bool: True if point r is on the left side of the line formed by points p and q, False otherwise.
+        """
+
     
-    """
-    get edge before and after v1
-    take cross product of edges
-    if > 0 --> cross each edge with the diagonal about to be drawn
-                if both <= 0, return false
+        # return (q[0] - p[0]) * (r[1] - p[1]) > (q[1] - p[1]) * (r[0] - p[0])
+        # val = (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0])
+
+        val = (q[0] - p[0]) * (r[1] - p[1]) > (q[1] - p[1]) * (r[0] - p[0])
+        # print("val: ", val)
+        return val > 0
+
+    def do_edges_intersect(p1, q1, p2, q2):
+        
+        # print("CHECKING INTERSECT", p1, q1, p2, q2)
+        """
+        Helper function to determine if two line segments formed by points (p1, q1) and (p2, q2) intersect.
+
+        Args:
+            p1 (tuple): Tuple representing the starting point of the first line segment.
+            q1 (tuple): Tuple representing the ending point of the first line segment.
+            p2 (tuple): Tuple representing the starting point of the second line segment.
+            q2 (tuple): Tuple representing the ending point of the second line segment.
+
+        Returns:
+            bool: True if the two line segments intersect, False otherwise.
+        """
+        # return (is_left(p1, q1, p2) != is_left(p1, q1, q2)) and (is_left(p2, q2, p1) != is_left(p2, q2, q1))
+        return (is_left(p1, q1, p2) != is_left(p1, q1, q2)) and (is_left(p2, q2, p1) != is_left(p2, q2, q1))
+    
+    # Check if the diagonal line (p1, p2) is interior to the polygon
+    if not (is_left(polygon[0], polygon[1], p1) ^ is_left(polygon[0], polygon[1], p2)):
+        # print("NOT INTERIOR")
+        return False
+
+    n = len(polygon)
+    lo = 1
+    hi = n - 1
+
+    # Binary search to find the two edges of the polygon that the diagonal (p1, p2) intersects
+    while hi - lo > 1:
+        mid = (lo + hi) // 2
+        if is_left(polygon[0], p1, polygon[mid]) == is_left(polygon[0], p1, p2):
+            lo = mid
+        else:
+            hi = mid
+
+    # Check if the diagonal (p1, p2) intersects any of the edges of the polygon
+    if do_edges_intersect(p1, p2, polygon[0], polygon[lo]) == True or do_edges_intersect(p1, p2, polygon[lo], polygon[hi]) == True or do_edges_intersect(p1, p2, polygon[hi], polygon[0]) == True:
+        final = True
+        # print("EDGES INTERSECTED")
     else:
-        cross each edge with the diagonal about to be drawn
-        if both <= 0, return false
+        final = False
 
-    repeat for v2
+    return final
 
-    completely after all this: return True
-
-    """
-    v1_n = list(graph.neighbors(v1))
-    v1_e1 = v1_n[0]
 
 def exit(x, y):
     global screen
